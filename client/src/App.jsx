@@ -4,11 +4,13 @@ import RepoCard from './components/RepoCard.jsx';
 import SortBar from './components/SortBar.jsx';
 import SkeletonCard from './components/SkeletonCard.jsx';
 import UserCardSkeleton from './components/UserCardSkeleton.jsx';
+import RecentSearches from './components/RecentSearches.jsx';
+import LanguageChart from './components/LanguageChart.jsx';
 import useGithub from './hooks/useGithub.js';
 import './index.css';
 
 export default function App() {
-  const { user, repos, loading, error, hasMore, search, loadMore } = useGithub();
+  const { user, repos, loading, error, hasMore, search, loadMore, recentSearches } = useGithub();
   const [sortBy, setSortBy] = useState('stars');
 
   const sortedRepos = useMemo(() => {
@@ -28,6 +30,7 @@ export default function App() {
 
       <main className="main">
         <SearchBar onSearch={search} loading={loading} />
+        <RecentSearches searches={recentSearches} onSelect={search} />
 
         {error && (
           <div className="error-box">
@@ -67,6 +70,10 @@ export default function App() {
               <a href={user.html_url} target="_blank" rel="noreferrer">View on GitHub</a>
             </div>
           </div>
+        )}
+
+        {!loading && repos.length > 0 && (
+          <LanguageChart repos={repos} />
         )}
 
         {!loading && sortedRepos.length > 0 && (

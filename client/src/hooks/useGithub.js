@@ -1,6 +1,22 @@
 import { useState } from 'react';
 import { fetchUser, fetchRepos } from '../services/api.js';
 
+const MAX_RECENT = 5;
+
+function loadRecent() {
+  try {
+    return JSON.parse(localStorage.getItem('recentSearches')) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecent(username, current) {
+  const updated = [username, ...current.filter(u => u !== username)].slice(0, MAX_RECENT);
+  localStorage.setItem('recentSearches', JSON.stringify(updated));
+  return updated;
+}
+
 export default function useGithub() {
   const [user, setUser] = useState(null);
   const [repos, setRepos] = useState([]);
@@ -9,6 +25,7 @@ export default function useGithub() {
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
   const [currentUsername, setCurrentUsername] = useState('');
+  const [recentSearches, setRecentSearches] = useState(loadRecent);
 
   async function search(username) {
     setLoading(true);
@@ -17,6 +34,9 @@ export default function useGithub() {
     setRepos([]);
     setPage(1);
     setCurrentUsername(username);
+
+    const updated = saveRecent(username, recentSearches);
+    setRecentSearches(updated);
 
     try {
       const [userData, repoData] = await Promise.all([
@@ -47,5 +67,5 @@ export default function useGithub() {
     }
   }
 
-  return { user, repos, loading, error, hasMore, search, loadMore };
+  return { user, repos, loading, error, hasMore, search, loadMore, recentSearches };
 }
