@@ -1,10 +1,23 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import SearchBar from './components/SearchBar.jsx';
+import RepoCard from './components/RepoCard.jsx';
+import SortBar from './components/SortBar.jsx';
+import SkeletonCard from './components/SkeletonCard.jsx';
+import UserCardSkeleton from './components/UserCardSkeleton.jsx';
 import useGithub from './hooks/useGithub.js';
 import './index.css';
 
 export default function App() {
   const { user, repos, loading, error, hasMore, search, loadMore } = useGithub();
+  const [sortBy, setSortBy] = useState('stars');
+
+  const sortedRepos = useMemo(() => {
+    const copy = [...repos];
+    if (sortBy === 'stars') return copy.sort((a, b) => b.stargazers_count - a.stargazers_count);
+    if (sortBy === 'name') return copy.sort((a, b) => a.name.localeCompare(b.name));
+    if (sortBy === 'updated') return copy.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+    return copy;
+  }, [repos, sortBy]);
 
   return (
     <div className="app">
@@ -28,7 +41,18 @@ export default function App() {
           </div>
         )}
 
-        {user && (
+        {loading && (
+          <>
+            <UserCardSkeleton />
+            <div className="repos-list">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          </>
+        )}
+
+        {!loading && user && (
           <div className="user-card">
             <img src={user.avatar_url} alt={user.login} className="avatar" />
             <div className="user-info">
@@ -45,22 +69,12 @@ export default function App() {
           </div>
         )}
 
-        {repos.length > 0 && (
+        {!loading && sortedRepos.length > 0 && (
           <div className="repos-section">
-            <h3>{repos.length} Repositories</h3>
+            <SortBar sortBy={sortBy} onSort={setSortBy} />
             <div className="repos-list">
-              {repos.map(repo => (
-                <div key={repo.id} className="repo-card">
-                  <a href={repo.html_url} target="_blank" rel="noreferrer">
-                    {repo.name}
-                  </a>
-                  {repo.description && <p>{repo.description}</p>}
-                  <div className="repo-meta">
-                    {repo.language && <span>🔵 {repo.language}</span>}
-                    <span>⭐ {repo.stargazers_count}</span>
-                    <span>Updated: {new Date(repo.updated_at).toLocaleDateString()}</span>
-                  </div>
-                </div>
+              {sortedRepos.map(repo => (
+                <RepoCard key={repo.id} repo={repo} />
               ))}
             </div>
 
