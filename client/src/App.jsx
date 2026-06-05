@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import SearchBar from './components/SearchBar.jsx';
 import RepoCard from './components/RepoCard.jsx';
 import SortBar from './components/SortBar.jsx';
@@ -14,6 +14,15 @@ import './App.css';
 export default function App() {
   const { user, repos, loading, error, hasMore, search, loadMore, recentSearches } = useGithub();
   const [sortBy, setSortBy] = useState('stars');
+  const [theme, setTheme] = useState('dark');
+
+  useEffect(() => {
+    document.body.className = theme;
+  }, [theme]);
+
+  function toggleTheme() {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  }
 
   const sortedRepos = useMemo(() => {
     const copy = [...repos];
@@ -28,6 +37,9 @@ export default function App() {
       <header className="header">
         <h1>⚡ GitHub Repo Explorer</h1>
         <p>Search any GitHub user to explore their profile and repositories</p>
+        <button className="theme-toggle" onClick={toggleTheme}>
+          {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+        </button>
       </header>
 
       <main>
@@ -36,11 +48,7 @@ export default function App() {
           <RecentSearches searches={recentSearches} onSelect={search} />
         </div>
 
-        {error && (
-          <div className="error-box">
-            ⚠️ {error}
-          </div>
-        )}
+        {error && <div className="error-box">⚠️ {error}</div>}
 
         {!user && !loading && !error && (
           <div className="empty-state">
@@ -61,10 +69,7 @@ export default function App() {
         )}
 
         {!loading && user && <UserCard user={user} />}
-
-        {!loading && repos.length > 0 && (
-          <LanguageChart repos={repos} />
-        )}
+        {!loading && repos.length > 0 && <LanguageChart repos={repos} />}
 
         {!loading && sortedRepos.length > 0 && (
           <div className="repos-section">
