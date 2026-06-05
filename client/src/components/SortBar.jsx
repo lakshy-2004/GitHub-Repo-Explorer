@@ -1,7 +1,9 @@
+import './SortBar.css';
+
 export default function SortBar({ sortBy, onSort }) {
   return (
     <div className="sort-bar">
-      <span>Sort by:</span>
+      <span className="sort-label">Sort by:</span>
       {['stars', 'name', 'updated'].map(option => (
         <button
           key={option}

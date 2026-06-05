@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './SearchBar.css';
 
 export default function SearchBar({ onSearch, loading }) {
   const [input, setInput] = useState('');
@@ -10,7 +11,7 @@ export default function SearchBar({ onSearch, loading }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="search-bar">
+    <form onSubmit={handleSubmit} className="search-row">
       <input
         type="text"
         value={input}
@@ -20,7 +21,7 @@ export default function SearchBar({ onSearch, loading }) {
         className="search-input"
       />
       <button type="submit" disabled={loading || !input.trim()} className="search-button">
-        {loading ? 'Searching...' : 'Search'}
+        {loading ? 'Searching...' : '🔍 Search'}
       </button>
     </form>
   );
